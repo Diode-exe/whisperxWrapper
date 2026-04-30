@@ -83,7 +83,8 @@ class GUI:
             return
 
         self.whisper_x_ref.load_model()
-        whisper_thread = threading.Thread(target=lambda: self.whisper_x_ref.transcribe_and_align(self.file_to_process, self.mode_var.get()))
+        whisper_thread = threading.Thread(target=lambda: self.whisper_x_ref.transcribe_and_align(self.file_to_process,
+                                                                                                 self.language.get()))
         whisper_thread.start()
 
     def select_file(self):

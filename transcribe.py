@@ -34,7 +34,7 @@ class WhisperXWrapper:
             compute_type=self.compute_type
         )
 
-    def transcribe_and_align(self, audio_path, mode):
+    def transcribe_and_align(self, audio_path, language="English"):
         try:
             import whisperx
         except Exception as e:
@@ -45,7 +45,7 @@ class WhisperXWrapper:
 
         audio = whisperx.load_audio(audio_path)
         print("Loaded audio, starting transcription...")
-        result = self.model.transcribe(audio, batch_size=16)
+        result = self.model.transcribe(audio, batch_size=16, language=language)
         print("Transcription complete, starting alignment...")
 
         print(f"Aligning on {self.device}...")
