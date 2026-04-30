@@ -1,6 +1,5 @@
 import os
 import json
-import whisperx
 from config import Config
 
 # Tell PyTorch that OmegaConf objects are safe to unpickle
@@ -21,13 +20,29 @@ class WhisperXWrapper:
         if model_name is not None:
             self.model_name = model_name
         print(f"Loading Transcription model on {self.device}...")
+        try:
+            import whisperx
+        except Exception as e:
+            raise ImportError(
+                "Failed to import whisperx. Ensure whisperx and its dependencies are installed: "
+                f"{e}"
+            )
+
         self.model = whisperx.load_model(
             self.model_name,
             device=self.device,
             compute_type=self.compute_type
         )
 
-    def transcribe_and_align(self, audio_path):
+    def transcribe_and_align(self, audio_path, mode):
+        try:
+            import whisperx
+        except Exception as e:
+            raise ImportError(
+                "Failed to import whisperx for transcription. Ensure whisperx is installed: "
+                f"{e}"
+            )
+
         audio = whisperx.load_audio(audio_path)
         print("Loaded audio, starting transcription...")
         result = self.model.transcribe(audio, batch_size=16)
