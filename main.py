@@ -6,6 +6,9 @@ from tkinter import filedialog, messagebox
 import threading
 
 from transcribe import WhisperXWrapper
+from config import Config
+
+configuration = Config()
 
 class GUI:
     def __init__(self, whisper_x_ref=None):
@@ -45,12 +48,15 @@ class GUI:
         #     value="translate"
         # )
         # self.radio_translate.pack(anchor="w", padx=10)
-        
-        self.language = tk.StringVar(value="option1")
+
+        self.language_label = ttk.Label(self.main_frame,
+                                        text="Select Language:", font=("Arial", 10, "bold"))
+        self.language_label.pack(anchor="e", padx=30)
+        self.language = tk.StringVar(value="English")
         self.language_select = ttk.Combobox(
             self.main_frame,
             textvariable=self.language,
-            values=["option1", "option2", "option3"],
+            values=configuration.supported_languages,
             state="readonly"  # prevents manual text entry
         )
         self.language_select.pack(anchor="e")
