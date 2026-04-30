@@ -11,15 +11,12 @@ configuration = Config()
 
 class WhisperXWrapper:
     def __init__(self):
-        self.device = configuration.device       # Transcription engine (CTranslate2)
-        self.compute_type = configuration.compute_type
-        self.model_name = configuration.model_name
         self.model = None
 
     def load_model(self, model_name: str=None):
         if model_name is not None:
             self.model_name = model_name
-        print(f"Loading Transcription model on {self.device}...")
+        print(f"Loading Transcription model on {configuration.device}...")
         try:
             import whisperx
         except Exception as e:
@@ -30,11 +27,11 @@ class WhisperXWrapper:
 
         self.model = whisperx.load_model(
             self.model_name,
-            device=self.device,
-            compute_type=self.compute_type
+            device=configuration.device,
+            compute_type=configuration.compute_type
         )
 
-    def transcribe_and_align(self, audio_path, language="English"):
+    def transcribe_and_align(self, audio_path, language="English", diarize=False):
         try:
             import whisperx
         except Exception as e:
@@ -48,10 +45,10 @@ class WhisperXWrapper:
         result = self.model.transcribe(audio, batch_size=16, language=language)
         print("Transcription complete, starting alignment...")
 
-        print(f"Aligning on {self.device}...")
+        print(f"Aligning on {configuration.device}...")
         model_a, metadata = whisperx.load_align_model(
             language_code=result["language"],
-            device=self.device
+            device=configuration.device
         )
 
         result = whisperx.align(
@@ -59,10 +56,21 @@ class WhisperXWrapper:
             model_a,
             metadata,
             audio,
-            self.device,
+            configuration.device,
             return_char_alignments=False
         )
         print("Alignment complete.")
+        if diarize:
+            hf_token = configuration.load_HF_token()
+            if not hf_token:
+                print("Cannot perform diarization without Hugging Face token. "
+                      "Please provide a valid token in 'hf_token.txt'. Skipping diarization.")
+                return result
+            diarize_model = whisperx.DiarizationPipeline(use_auth_token=hf_token,
+                                                         device=configuration.device)
+            diarize_segments = diarize_model(audio)
+            result = whisperx.assign_word_speakers(diarize_segments, result)
+
         with open("transcription_output.json", "w", encoding="utf-8") as f:
             json.dump(result, f, ensure_ascii=False, indent=4)
         return result

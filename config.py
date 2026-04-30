@@ -5,26 +5,26 @@ class Config:
         self.compute_type = "int8"
         self.supported_languages = ["Afrikaans", "Albanian", "Amharic",
                                     "Arabic", "Armenian", "Assamese",
-                                    "Azerbaijani", "Bashkir", 
+                                    "Azerbaijani", "Bashkir",
                                     "Basque", "Belarusian", "Bengali",
                                     "Bosnian", "Breton", "Bulgarian",
-                                    "Burmese", "Cantonese", "Castilian", "Catalan", 
+                                    "Burmese", "Cantonese", "Castilian", "Catalan",
                                     "Chinese", "Croatian", "Czech",
-                                    "Danish", "Dutch", "English", 
+                                    "Danish", "Dutch", "English",
                                     "Estonian", "Faroese", "Finnish",
-                                    "Flemish", "French", "Galician", 
+                                    "Flemish", "French", "Galician",
                                     "Georgian", "German", "Greek",
                                     "Gujarati", "Haitian", "Haitian Creole",
                                     "Hausa", "Hawaiian", "Hebrew",
-                                    "Hindi", "Hungarian", "Icelandic", 
+                                    "Hindi", "Hungarian", "Icelandic",
                                     "Indonesian", "Italian", "Japanese",
-                                    "Javanese", "Kannada", "Kazakh", 
+                                    "Javanese", "Kannada", "Kazakh",
                                     "Khmer", "Korean", "Lao", "Latin",
-                                    "Latvian", "Letzeburgesch", "Lingala", 
+                                    "Latvian", "Letzeburgesch", "Lingala",
                                     "Lithuanian", "Luxembourgish", "Macedonian",
                                     "Malagasy", "Malay", "Malayalam",
-                                    "Maltese", "Maori", "Marathi", 
-                                    "Moldavian", "Moldovan", "Mongolian", 
+                                    "Maltese", "Maori", "Marathi",
+                                    "Moldavian", "Moldovan", "Mongolian",
                                     "Myanmar", "Nepali", "Norwegian",
                                     "Nynorsk", "Occitan", "Panjabi",
                                     "Pashto", "Persian", "Polish",
@@ -36,7 +36,15 @@ class Config:
                                     "Sundanese", "Swahili", "Swedish",
                                     "Tagalog", "Tajik", "Tamil",
                                     "Tatar", "Telugu", "Thai",
-                                    "Tibetan", "Turkish", "Turkmen", 
+                                    "Tibetan", "Turkish", "Turkmen",
                                     "Ukrainian", "Urdu", "Uzbek",
                                     "Valencian", "Vietnamese", "Welsh",
                                     "Yiddish", "Yorubas"]
+    def load_HF_token(self):
+        try:
+            with open("hf_token.txt", "r") as f:
+                token = f.read().strip()
+                return token
+        except FileNotFoundError:
+            print("HF token file not found. Please create a 'hf_token.txt' file with your Hugging Face token.")
+            return None

@@ -40,6 +40,14 @@ class GUI:
             value="transcribe"
         )
         self.radio_transcribe.pack(anchor="w", padx=10)
+        
+        self.diarize_var = tk.BooleanVar(value=False)
+        self.diarize = ttk.Checkbutton(
+            self.main_frame,
+            text="Enable Speaker Diarization",
+            variable=self.diarize_var
+        )
+        self.diarize.pack(anchor="w", padx=10)
 
         # self.radio_translate = ttk.Radiobutton(
         #     self.main_frame,
