@@ -15,6 +15,7 @@ class GUI:
         self.file_to_process = None
         self.whisper_thread = None
         self.load_model_thread = None
+        self.is_model_loaded = False
         self.check_vars = []
 
         self.whisper_x_ref = whisper_x_ref
@@ -174,29 +175,51 @@ class GUI:
             messagebox.showwarning("No File Selected", "Please select a file to process.")
             return
 
-        if self.whisper_thread and self.whisper_thread.is_alive():
-            messagebox.showinfo("Processing", "A transcription task is already running.")
-            return
+        # Disable the run button so they don't click it twice
+        self.btn_run.config(state="disabled")
+        self.btn_run.config(text="Loading Model...")
 
-        output_formats = []
-        if self.srt_check_var.get():
-            output_formats.append("srt")
-        if self.vtt_check_var.get():
-            output_formats.append("vtt")
-        if self.txt_check_var.get():
-            output_formats.append("txt")
-        if self.json_check_var.get():
-            output_formats.append("json")
-        if self.tsv_check_var.get():
-            output_formats.append("tsv")
+        # Start loading the model in a background thread
+        # Note: Added a wrapper to set the flag when done
+        def load_task():
+            self.whisper_x_ref.load_model(model_name=self.model_select_var.get())
+            self.is_model_loaded = True
 
-        self.whisper_x_ref.load_model()
-        self.whisper_thread = threading.Thread(target=lambda: self.whisper_x_ref.transcribe_and_align(
-            self.file_to_process,
-            language=self.language_var.get(),
-            diarize=self.diarize_var.get(),
-            output_formats=output_formats
-        ), daemon=True)
+        self.load_model_thread = threading.Thread(target=load_task, daemon=True)
+        self.load_model_thread.start()
+
+        # Start the "polling" function to wait for the thread without .join()
+        self.monitor_load_thread()
+
+    def monitor_load_thread(self):
+        """Checks if the model loading thread is finished every 100ms."""
+        if self.load_model_thread.is_alive():
+            # Thread is still working, check again in 100ms
+            self.root.after(100, self.monitor_load_thread)
+        else:
+            # Model is loaded! Now start the actual transcription
+            self.btn_run.config(text="Transcribing...")
+            self.run_actual_transcription()
+
+    def run_actual_transcription(self):
+        output_formats = [fmt for fmt, var in [
+            ("srt", self.srt_check_var), ("vtt", self.vtt_check_var),
+            ("txt", self.txt_check_var), ("json", self.json_check_var),
+            ("tsv", self.tsv_check_var)
+        ] if var.get()]
+
+        def trans_task():
+            self.whisper_x_ref.transcribe_and_align(
+                self.file_to_process,
+                language=self.language_var.get(),
+                diarize=self.diarize_var.get(),
+                output_formats=output_formats
+            )
+            # Re-enable the UI on completion
+            self.root.after(0, lambda: self.btn_run.config(state="normal", text="Start Processing"))
+            self.root.after(0, lambda: messagebox.showinfo("Done", "Transcription Complete!"))
+
+        self.whisper_thread = threading.Thread(target=trans_task, daemon=True)
         self.whisper_thread.start()
 
     def select_file(self):
