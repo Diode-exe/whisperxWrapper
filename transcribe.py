@@ -69,10 +69,15 @@ class WhisperXWrapper:
                 print("Cannot perform diarization without Hugging Face token. "
                       "Please provide a valid token in 'hf_token.txt'. Skipping diarization.")
                 return result
-            diarize_model = whisperx.DiarizationPipeline(use_auth_token=hf_token,
-                                                         device=self.configuration.device)
-            diarize_segments = diarize_model(audio)
-            result = whisperx.assign_word_speakers(diarize_segments, result)
+            try:
+                diarize_model = whisperx.diarize.DiarizationPipeline(token=hf_token,
+                                                            device=self.configuration.device)
+                diarize_segments = diarize_model(audio)
+                result = whisperx.assign_word_speakers(diarize_segments, result)
+            except Exception as e:
+                print(f"Failed to perform diarization: {e}")
+                print("You may need to accept the terms of the diarization model on Hugging Face "
+                      "and ensure your token has access.")
 
         with open("transcription_output.json", "w", encoding="utf-8") as f:
             json.dump(result, f, ensure_ascii=False, indent=4)
