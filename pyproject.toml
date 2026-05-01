@@ -3,8 +3,7 @@ name = "whisperxwrapper"
 version = "0.1.0"
 description = "Simple wrapper for the whisperx library to make it easier to use."
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = "==3.11.9"
 dependencies = [
-    "whisperx>=3.3.1",
-    "matplotlib"
+    "whisperx>=3.8.5",
 ]
