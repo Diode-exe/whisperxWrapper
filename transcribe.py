@@ -1,5 +1,6 @@
 import os
 import json
+import warnings
 from config import Config
 
 # Tell PyTorch that OmegaConf objects are safe to unpickle
@@ -44,8 +45,22 @@ class WhisperXWrapper:
 
         audio = whisperx.load_audio(audio_path)
         print("Loaded audio, starting transcription...")
-        result = self.model.transcribe(audio, batch_size=16,
-                                       language=self.configuration.long_to_short.get(language, "en"))
+        language_short = self.configuration.long_to_short.get(language, "en")
+        print(f"Transcription language code: {language_short}")
+        try:
+            result = self.model.transcribe(
+                audio,
+                batch_size=16,
+                language=language_short,
+                language_code=language_short,
+            )
+        except TypeError:
+            # Older/newer whisperx versions may not accept `language_code` kwarg.
+            result = self.model.transcribe(
+                audio,
+                batch_size=16,
+                language=language_short,
+            )
         print("Transcription complete, starting alignment...")
 
         print(f"Aligning on {self.configuration.device}...")
@@ -72,13 +87,19 @@ class WhisperXWrapper:
             try:
                 diarize_model = whisperx.diarize.DiarizationPipeline(token=hf_token,
                                                             device=self.configuration.device)
-                diarize_segments = diarize_model(audio)
+                with warnings.catch_warnings():
+                    warnings.filterwarnings(
+                        "ignore",
+                        message=r"std\(\): degrees of freedom is <= 0.*",
+                        category=UserWarning,
+                    )
+                    diarize_segments = diarize_model(audio)
                 result = whisperx.assign_word_speakers(diarize_segments, result)
+            except KeyboardInterrupt:
+                print("Diarization interrupted by user.")
+                return result
             except Exception as e:
                 print(f"Failed to perform diarization: {e}")
                 print("You may need to accept the terms of the diarization model on Hugging Face "
                       "and ensure your token has access.")
-
-        with open("transcription_output.json", "w", encoding="utf-8") as f:
-            json.dump(result, f, ensure_ascii=False, indent=4)
         return result

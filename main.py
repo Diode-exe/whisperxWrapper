@@ -13,11 +13,12 @@ configuration = Config()
 class GUI:
     def __init__(self, whisper_x_ref=None):
         self.file_to_process = None
+        self.whisper_thread = None
 
         self.whisper_x_ref = whisper_x_ref
         self.root = tk.Tk()
         self.root.title("WhisperX GUI Wrapper")
-        self.root.geometry("500x400")
+        self.root.geometry("500x500")
 
         # self.style = ttk.Style(self.root)
         # self.style.theme_use('classic')
@@ -61,18 +62,56 @@ class GUI:
                                         text="Select Language:", font=("Arial", 10, "bold"))
         self.language_label.pack(anchor="e", padx=30)
 
-        self.language = tk.StringVar(value="English")
+        self.language_var = tk.StringVar(value="English")
         self.language_select = ttk.Combobox(
             self.main_frame,
-            textvariable=self.language,
+            textvariable=self.language_var,
             values=configuration.supported_languages_longhand,
             state="readonly"  # prevents manual text entry
         )
         self.language_select.pack(anchor="e")
 
-        # --- Separator ---
-        self.sep = ttk.Separator(self.main_frame, orient="horizontal")
-        self.sep.pack(fill="x", pady=20)
+        # --- Output Format Checkboxes ---
+        self.output_check_frame = ttk.Frame(self.main_frame)
+        self.output_check_frame.pack(fill="x", pady=20, anchor="w")
+        self.output_check_label_frame = ttk.LabelFrame(self.output_check_frame, text="Output Formats", padding="10")
+        self.output_check_label_frame.pack(anchor="w", padx=10)
+
+        self.srt_check_var = tk.BooleanVar(value=True)
+        self.srt_check = ttk.Checkbutton(
+            self.output_check_label_frame,
+            text="Save as .srt",
+            variable=self.srt_check_var
+        )
+        self.srt_check.pack(anchor="w", padx=10)
+        self.vtt_check_var = tk.BooleanVar(value=True)
+        self.vtt_check = ttk.Checkbutton(
+            self.output_check_label_frame,
+            text="Save as .vtt",
+            variable=self.vtt_check_var
+        )
+        self.vtt_check.pack(anchor="w", padx=10)
+        self.txt_check_var = tk.BooleanVar(value=True)
+        self.txt_check = ttk.Checkbutton(
+            self.output_check_label_frame,
+            text="Save as .txt",
+            variable=self.txt_check_var
+        )
+        self.txt_check.pack(anchor="w", padx=10)
+        self.json_check_var = tk.BooleanVar(value=True)
+        self.json_check = ttk.Checkbutton(
+            self.output_check_label_frame,
+            text="Save as .json",
+            variable=self.json_check_var
+        )
+        self.json_check.pack(anchor="w", padx=10)
+        self.tsv_check_var = tk.BooleanVar(value=True)
+        self.tsv_check = ttk.Checkbutton(
+            self.output_check_label_frame,
+            text="Save as .tsv",
+            variable=self.tsv_check_var
+        )
+        self.tsv_check.pack(anchor="w", padx=10)
 
         # --- Action Buttons ---
         self.btn_select_file = ttk.Button(self.main_frame, text="Select Audio/Video File",
@@ -86,18 +125,28 @@ class GUI:
         self.btn_settings = ttk.Button(self.main_frame, text="Advanced Settings")
         self.btn_settings.pack(fill="x", pady=5)
 
+
+        # --- Separator ---
+        self.sep = ttk.Separator(self.main_frame, orient="horizontal")
+        self.sep.pack(fill="x", pady=20)
+
+
     def start_transcription(self):
         if not self.file_to_process:
             messagebox.showwarning("No File Selected", "Please select a file to process.")
             return
 
+        if self.whisper_thread and self.whisper_thread.is_alive():
+            messagebox.showinfo("Processing", "A transcription task is already running.")
+            return
+
         self.whisper_x_ref.load_model()
-        whisper_thread = threading.Thread(target=lambda: self.whisper_x_ref.transcribe_and_align(
+        self.whisper_thread = threading.Thread(target=lambda: self.whisper_x_ref.transcribe_and_align(
             self.file_to_process,
-            language=self.language.get(),
+            language=self.language_var.get(),
             diarize=self.diarize_var.get()
-        ))
-        whisper_thread.start()
+        ), daemon=True)
+        self.whisper_thread.start()
 
     def select_file(self):
         self.file_to_process = filedialog.askopenfilename(
@@ -106,7 +155,12 @@ class GUI:
         )
 
     def run(self):
-        self.root.mainloop()
+        try:
+            self.root.mainloop()
+        except KeyboardInterrupt:
+            print("Interrupted by user. Closing application...")
+            self.root.quit()
+            self.root.destroy()
 
 if __name__ == "__main__":
     whisper_transcriber = WhisperXWrapper()
