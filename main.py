@@ -14,6 +14,7 @@ class GUI:
     def __init__(self, whisper_x_ref=None):
         self.file_to_process = None
         self.whisper_thread = None
+        self.check_vars = []
 
         self.whisper_x_ref = whisper_x_ref
         self.root = tk.Tk()
@@ -83,10 +84,12 @@ class GUI:
             self.output_check_label_frame,
             text="Save in All Formats",
             variable=self.all_formats_var,
+            command=self.toggle_all_checkboxes
         )
         self.all_formats_check.pack(anchor="w", padx=10)
 
         self.srt_check_var = tk.BooleanVar(value=True)
+        self.check_vars.append(self.srt_check_var)
         self.srt_check = ttk.Checkbutton(
             self.output_check_label_frame,
             text="Save as .srt",
@@ -95,6 +98,7 @@ class GUI:
         self.srt_check.pack(anchor="w", padx=10)
 
         self.vtt_check_var = tk.BooleanVar(value=True)
+        self.check_vars.append(self.vtt_check_var)
         self.vtt_check = ttk.Checkbutton(
             self.output_check_label_frame,
             text="Save as .vtt",
@@ -103,6 +107,7 @@ class GUI:
         self.vtt_check.pack(anchor="w", padx=10)
 
         self.txt_check_var = tk.BooleanVar(value=True)
+        self.check_vars.append(self.txt_check_var)
         self.txt_check = ttk.Checkbutton(
             self.output_check_label_frame,
             text="Save as .txt",
@@ -111,6 +116,7 @@ class GUI:
         self.txt_check.pack(anchor="w", padx=10)
 
         self.json_check_var = tk.BooleanVar(value=True)
+        self.check_vars.append(self.json_check_var)
         self.json_check = ttk.Checkbutton(
             self.output_check_label_frame,
             text="Save as .json",
@@ -119,6 +125,7 @@ class GUI:
         self.json_check.pack(anchor="w", padx=10)
 
         self.tsv_check_var = tk.BooleanVar(value=True)
+        self.check_vars.append(self.tsv_check_var)
         self.tsv_check = ttk.Checkbutton(
             self.output_check_label_frame,
             text="Save as .tsv",
@@ -179,6 +186,15 @@ class GUI:
             title="Select Audio/Video File",
             filetypes=[("Audio/Video Files", "*.mp4 *.mp3 *.wav *.m4a"), ("All Files", "*.*")]
         )
+    
+    def toggle_all_checkboxes(self):
+        if self.all_formats_var.get():
+            for var in self.check_vars:
+                var.set(True)
+        else:
+            for var in self.check_vars:
+                var.set(False)
+            self.tsv_check_var.set(True)
 
     def run(self):
         try:
