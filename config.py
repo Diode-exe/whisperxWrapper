@@ -1,8 +1,23 @@
 class Config:
     def __init__(self):
+        # default model name
+        # can be changed in the GUI
+        # or by setting the `model_name` attribute of the `WhisperXWrapper` instance
         self.model_name = "large-v3-turbo"
+        self.models = [
+            "tiny", "tiny.en",
+            "base", "base.en",
+            "small", "small.en",
+            "medium", "medium.en",
+            "large-v1", "large-v2", "large-v3",
+            "large-v3-turbo" # The newest high-speed variant
+        ]
+        # inference platform
+        # cannot be changed because you would need
+        # to install the appropriate dependencies for each platform
         self.device = "cpu"
         self.compute_type = "int8"
+        # this isn't used in the code but is here for reference/documentation purposes
         self.supported_languages_shorthand = [
             "af", "am", "ar", "as", "az", "ba", "be", "bg", "bn", "bo",
             "br", "bs", "ca", "cs", "cy", "da", "de", "el", "en", "es",
@@ -15,17 +30,43 @@ class Config:
             "su", "sv", "sw", "ta", "te", "tg", "th", "tk", "tl", "tr",
             "tt", "uk", "ur", "uz", "vi", "yo", "zh"
         ]
+        # This list is used to populate the dropdown menu in the GUI for language selection
+        # these are sorted in alphabetical order by the shorthand language code
+        # to ensure the longhand names are always in the same order
         self.supported_languages_longhand = [
-            "Afrikaans", "Amharic", "Arabic", "Assamese", "Azerbaijani", "Bashkir", "Belarusian", "Bulgarian", "Bengali", "Tibetan",
-            "Breton", "Bosnian", "Catalan", "Czech", "Welsh", "Danish", "German", "Greek", "English", "Spanish",
-            "Estonian", "Basque", "Persian", "Finnish", "Faroese", "French", "Galician", "Gujarati", "Hausa", "Hawaiian",
-            "Hebrew", "Hindi", "Croatian", "Hungarian", "Armenian", "Indonesian", "Icelandic", "Italian", "Japanese", "Javanese",
-            "Georgian", "Kazakh", "Khmer", "Kannada", "Korean", "Latin", "Luxembourgish", "Lingala", "Lao", "Lithuanian",
-            "Latvian", "Malagasy", "Maori", "Macedonian", "Malayalam", "Mongolian", "Marathi", "Malay", "Maltese", "Myanmar",
-            "Nepali", "Dutch", "Nynorsk", "Norwegian", "Occitan", "Punjabi", "Polish", "Pashto", "Portuguese", "Romanian",
-            "Russian", "Sanskrit", "Sindhi", "Sinhala", "Slovak", "Slovenian", "Shona", "Somali", "Albanian", "Serbian",
-            "Sundanese", "Swedish", "Swahili", "Tamil", "Telugu", "Tajik", "Thai", "Turkmen", "Tagalog", "Turkish",
-            "Tatar", "Ukrainian", "Urdu", "Uzbek", "Vietnamese", "Yoruba", "Chinese"
+            "Afrikaans", "Amharic", "Arabic",
+            "Assamese", "Azerbaijani", "Bashkir",
+            "Belarusian", "Bulgarian", "Bengali",
+            "Tibetan", "Breton", "Bosnian",
+            "Catalan", "Czech", "Welsh",
+            "Danish", "German", "Greek",
+            "English", "Spanish", "Estonian",
+            "Basque", "Persian", "Finnish",
+            "Faroese", "French", "Galician",
+            "Gujarati", "Hausa", "Hawaiian",
+            "Hebrew", "Hindi", "Croatian",
+            "Hungarian", "Armenian", "Indonesian",
+            "Icelandic", "Italian", "Japanese",
+            "Javanese", "Georgian", "Kazakh",
+            "Khmer", "Kannada", "Korean",
+            "Latin", "Luxembourgish", "Lingala",
+            "Lao", "Lithuanian", "Latvian",
+            "Malagasy", "Maori", "Macedonian",
+            "Malayalam", "Mongolian", "Marathi",
+            "Malay", "Maltese", "Myanmar",
+            "Nepali", "Dutch", "Nynorsk",
+            "Norwegian", "Occitan", "Punjabi",
+            "Polish", "Pashto", "Portuguese",
+            "Romanian", "Russian", "Sanskrit",
+            "Sindhi", "Sinhala", "Slovak",
+            "Slovenian", "Shona", "Somali",
+            "Albanian", "Serbian", "Sundanese",
+            "Swedish", "Swahili", "Tamil",
+            "Telugu", "Tajik", "Thai",
+            "Turkmen", "Tagalog", "Turkish",
+            "Tatar", "Ukrainian", "Urdu",
+            "Uzbek", "Vietnamese", "Yoruba",
+            "Chinese"
         ]
 
         self.long_to_short = {'Afrikaans': 'af', 'Amharic': 'am',
@@ -80,9 +121,10 @@ class Config:
 
     def load_HF_token(self):
         try:
-            with open("hf_token.txt", "r") as f:
+            with open("hf_token.txt", "r", encoding="utf-8") as f:
                 token = f.read().strip()
                 return token
         except FileNotFoundError:
-            print("HF token file not found. Please create a 'hf_token.txt' file with your Hugging Face token.")
+            print("HF token file not found. "
+                  "Please create a 'hf_token.txt' file with your Hugging Face token.")
             return None
