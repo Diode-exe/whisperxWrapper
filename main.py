@@ -140,11 +140,24 @@ class GUI:
             messagebox.showinfo("Processing", "A transcription task is already running.")
             return
 
+        output_formats = []
+        if self.srt_check_var.get():
+            output_formats.append("srt")
+        if self.vtt_check_var.get():
+            output_formats.append("vtt")
+        if self.txt_check_var.get():
+            output_formats.append("txt")
+        if self.json_check_var.get():
+            output_formats.append("json")
+        if self.tsv_check_var.get():
+            output_formats.append("tsv")
+
         self.whisper_x_ref.load_model()
         self.whisper_thread = threading.Thread(target=lambda: self.whisper_x_ref.transcribe_and_align(
             self.file_to_process,
             language=self.language_var.get(),
-            diarize=self.diarize_var.get()
+            diarize=self.diarize_var.get(),
+            output_formats=output_formats
         ), daemon=True)
         self.whisper_thread.start()
 

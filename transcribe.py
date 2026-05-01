@@ -1,5 +1,4 @@
 import os
-import json
 import warnings
 from config import Config
 
@@ -34,7 +33,9 @@ class WhisperXWrapper:
             compute_type=self.configuration.compute_type
         )
 
-    def transcribe_and_align(self, audio_path, language="English", diarize=False):
+    def transcribe_and_align(self, audio_path, language="English", diarize=False, output_formats=None):
+        if output_formats is None:
+            output_formats = []
         try:
             import whisperx
         except Exception as e:
@@ -61,6 +62,8 @@ class WhisperXWrapper:
                 batch_size=16,
                 language=language_short,
             )
+        # keep original transcription result (contains language metadata)
+        trans_result = result
         print("Transcription complete, starting alignment...")
 
         print(f"Aligning on {self.configuration.device}...")
@@ -70,13 +73,18 @@ class WhisperXWrapper:
         )
 
         result = whisperx.align(
-            result["segments"],
+            trans_result["segments"],
             model_a,
             metadata,
             audio,
             self.configuration.device,
             return_char_alignments=False
         )
+        # ensure language metadata is present for writers
+        try:
+            result["language"] = trans_result.get("language", language_short)
+        except Exception:
+            result = {**(result or {}), "language": trans_result.get("language", language_short)}
         print("Alignment complete.")
         if diarize:
             hf_token = self.configuration.load_HF_token()
@@ -102,4 +110,11 @@ class WhisperXWrapper:
                 print(f"Failed to perform diarization: {e}")
                 print("You may need to accept the terms of the diarization model on Hugging Face "
                       "and ensure your token has access.")
+        print("Diarization complete.")
+        # Normalize output_formats to a list of format strings
+        options = {"max_line_width": 80, "max_line_count": None, "highlight_words": False}
+        for fmt in output_formats:
+            print(f"Writing output in {fmt} format...")
+            writer = whisperx.utils.get_writer(fmt, output_dir="out_dir")
+            writer(result, audio_path, options)
         return result
