@@ -14,5 +14,6 @@ wheels/
 *.json
 *.srt
 *.vtt
+*.tsv
 
 out_dir/

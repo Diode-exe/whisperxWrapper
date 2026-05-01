@@ -115,6 +115,6 @@ class WhisperXWrapper:
         options = {"max_line_width": 80, "max_line_count": None, "highlight_words": False}
         for fmt in output_formats:
             print(f"Writing output in {fmt} format...")
-            writer = whisperx.utils.get_writer(fmt, output_dir="out_dir")
+            writer = whisperx.utils.get_writer(fmt, output_dir=os.path.dirname(audio_path))
             writer(result, audio_path, options)
         return result
