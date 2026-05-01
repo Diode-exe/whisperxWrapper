@@ -11,6 +11,7 @@ os.environ["TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD"] = "1"
 class WhisperXWrapper:
     def __init__(self):
         self.model = None
+        self.model_name = None
         self.configuration = Config()
 
     def load_model(self, model_name: str=None):
@@ -22,10 +23,8 @@ class WhisperXWrapper:
         try:
             import whisperx
         except Exception as e:
-            raise ImportError(
-                "Failed to import whisperx. Ensure whisperx and its dependencies are installed: "
-                f"{e}"
-            )
+            print("Failed to import whisperx. Ensure whisperx and its dependencies are installed: "
+                f"{e}")
 
         self.model = whisperx.load_model(
             self.model_name,
@@ -39,10 +38,8 @@ class WhisperXWrapper:
         try:
             import whisperx
         except Exception as e:
-            raise ImportError(
-                "Failed to import whisperx for transcription. Ensure whisperx is installed: "
-                f"{e}"
-            )
+            print("Failed to import whisperx for transcription. Ensure whisperx is installed: "
+                f"{e}")
 
         audio = whisperx.load_audio(audio_path)
         print("Loaded audio, starting transcription...")

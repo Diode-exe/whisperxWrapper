@@ -14,6 +14,7 @@ class GUI:
     def __init__(self, whisper_x_ref=None):
         self.file_to_process = None
         self.whisper_thread = None
+        self.load_model_thread = None
         self.check_vars = []
 
         self.whisper_x_ref = whisper_x_ref
@@ -71,6 +72,20 @@ class GUI:
             state="readonly"  # prevents manual text entry
         )
         self.language_select.pack(anchor="e")
+
+        # --- Model Selection Dropdown ---
+        self.model_select_var = tk.StringVar(value=configuration.model_name)
+        self.model_select_label = ttk.Label(self.main_frame,
+                                            text="Select Model:", font=("Arial", 10, "bold"))
+        self.model_select_label.pack(anchor="e", padx=55)
+
+        self.model_select = ttk.Combobox(
+            self.main_frame,
+            textvariable=self.model_select_var,
+            values=configuration.models,
+            state="readonly"  # prevents manual text entry
+        )
+        self.model_select.pack(anchor="e")
 
         # --- Output Format Checkboxes ---
         self.output_check_frame = ttk.Frame(self.main_frame)
@@ -138,6 +153,10 @@ class GUI:
         )
         self.tsv_check.pack(anchor="w", padx=10)
 
+        # # --- Separator ---
+        # self.sep = ttk.Separator(self.main_frame, orient="horizontal")
+        # self.sep.pack(fill="x", pady=20)
+
         # --- Action Buttons ---
         self.btn_select_file = ttk.Button(self.main_frame, text="Select Audio/Video File",
                                           command=self.select_file)
@@ -147,12 +166,8 @@ class GUI:
                                   command=self.start_transcription)
         self.btn_run.pack(fill="x", pady=5)
 
-        self.btn_settings = ttk.Button(self.main_frame, text="Advanced Settings")
-        self.btn_settings.pack(fill="x", pady=5)
-
-        # --- Separator ---
-        self.sep = ttk.Separator(self.main_frame, orient="horizontal")
-        self.sep.pack(fill="x", pady=20)
+        # self.btn_settings = ttk.Button(self.main_frame, text="Advanced Settings")
+        # self.btn_settings.pack(fill="x", pady=5)
 
     def start_transcription(self):
         if not self.file_to_process:

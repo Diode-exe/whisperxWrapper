@@ -17,3 +17,5 @@ wheels/
 *.tsv
 
 out_dir/
+
+.pylintrc
