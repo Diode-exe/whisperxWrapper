@@ -93,7 +93,8 @@ class GUI:
         self.srt_check = ttk.Checkbutton(
             self.output_check_label_frame,
             text="Save as .srt",
-            variable=self.srt_check_var
+            variable=self.srt_check_var,
+            command=self.monitor_all_checkbox_state
         )
         self.srt_check.pack(anchor="w", padx=10)
 
@@ -102,7 +103,8 @@ class GUI:
         self.vtt_check = ttk.Checkbutton(
             self.output_check_label_frame,
             text="Save as .vtt",
-            variable=self.vtt_check_var
+            variable=self.vtt_check_var,
+            command=self.monitor_all_checkbox_state
         )
         self.vtt_check.pack(anchor="w", padx=10)
 
@@ -111,7 +113,8 @@ class GUI:
         self.txt_check = ttk.Checkbutton(
             self.output_check_label_frame,
             text="Save as .txt",
-            variable=self.txt_check_var
+            variable=self.txt_check_var,
+            command=self.monitor_all_checkbox_state
         )
         self.txt_check.pack(anchor="w", padx=10)
 
@@ -120,7 +123,8 @@ class GUI:
         self.json_check = ttk.Checkbutton(
             self.output_check_label_frame,
             text="Save as .json",
-            variable=self.json_check_var
+            variable=self.json_check_var,
+            command=self.monitor_all_checkbox_state
         )
         self.json_check.pack(anchor="w", padx=10)
 
@@ -129,7 +133,8 @@ class GUI:
         self.tsv_check = ttk.Checkbutton(
             self.output_check_label_frame,
             text="Save as .tsv",
-            variable=self.tsv_check_var
+            variable=self.tsv_check_var,
+            command=self.monitor_all_checkbox_state
         )
         self.tsv_check.pack(anchor="w", padx=10)
 
@@ -145,11 +150,9 @@ class GUI:
         self.btn_settings = ttk.Button(self.main_frame, text="Advanced Settings")
         self.btn_settings.pack(fill="x", pady=5)
 
-
         # --- Separator ---
         self.sep = ttk.Separator(self.main_frame, orient="horizontal")
         self.sep.pack(fill="x", pady=20)
-
 
     def start_transcription(self):
         if not self.file_to_process:
@@ -186,7 +189,7 @@ class GUI:
             title="Select Audio/Video File",
             filetypes=[("Audio/Video Files", "*.mp4 *.mp3 *.wav *.m4a"), ("All Files", "*.*")]
         )
-    
+
     def toggle_all_checkboxes(self):
         if self.all_formats_var.get():
             for var in self.check_vars:
@@ -194,7 +197,12 @@ class GUI:
         else:
             for var in self.check_vars:
                 var.set(False)
-            self.tsv_check_var.set(True)
+
+    def monitor_all_checkbox_state(self):
+        if all(var.get() for var in self.check_vars):
+            self.all_formats_var.set(True)
+        else:
+            self.all_formats_var.set(False)
 
     def run(self):
         try:
