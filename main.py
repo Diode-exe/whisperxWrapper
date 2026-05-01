@@ -40,7 +40,7 @@ class GUI:
             value="transcribe"
         )
         self.radio_transcribe.pack(anchor="w", padx=10)
-        
+
         self.diarize_var = tk.BooleanVar(value=False)
         self.diarize = ttk.Checkbutton(
             self.main_frame,
@@ -60,11 +60,12 @@ class GUI:
         self.language_label = ttk.Label(self.main_frame,
                                         text="Select Language:", font=("Arial", 10, "bold"))
         self.language_label.pack(anchor="e", padx=30)
+
         self.language = tk.StringVar(value="English")
         self.language_select = ttk.Combobox(
             self.main_frame,
             textvariable=self.language,
-            values=configuration.supported_languages,
+            values=configuration.supported_languages_longhand,
             state="readonly"  # prevents manual text entry
         )
         self.language_select.pack(anchor="e")
@@ -91,8 +92,11 @@ class GUI:
             return
 
         self.whisper_x_ref.load_model()
-        whisper_thread = threading.Thread(target=lambda: self.whisper_x_ref.transcribe_and_align(self.file_to_process,
-                                                                                                 self.language.get()))
+        whisper_thread = threading.Thread(target=lambda: self.whisper_x_ref.transcribe_and_align(
+            self.file_to_process,
+            language=self.language.get(),
+            diarize=self.diarize_var.get()
+        ))
         whisper_thread.start()
 
     def select_file(self):
