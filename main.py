@@ -74,8 +74,17 @@ class GUI:
         # --- Output Format Checkboxes ---
         self.output_check_frame = ttk.Frame(self.main_frame)
         self.output_check_frame.pack(fill="x", pady=20, anchor="w")
-        self.output_check_label_frame = ttk.LabelFrame(self.output_check_frame, text="Output Formats", padding="10")
+        self.output_check_label_frame = ttk.LabelFrame(self.output_check_frame,
+                                                       text="Output Formats", padding="10")
         self.output_check_label_frame.pack(anchor="w", padx=10)
+
+        self.all_formats_var = tk.BooleanVar(value=True)
+        self.all_formats_check = ttk.Checkbutton(
+            self.output_check_label_frame,
+            text="Save in All Formats",
+            variable=self.all_formats_var,
+        )
+        self.all_formats_check.pack(anchor="w", padx=10)
 
         self.srt_check_var = tk.BooleanVar(value=True)
         self.srt_check = ttk.Checkbutton(
@@ -84,6 +93,7 @@ class GUI:
             variable=self.srt_check_var
         )
         self.srt_check.pack(anchor="w", padx=10)
+
         self.vtt_check_var = tk.BooleanVar(value=True)
         self.vtt_check = ttk.Checkbutton(
             self.output_check_label_frame,
@@ -91,6 +101,7 @@ class GUI:
             variable=self.vtt_check_var
         )
         self.vtt_check.pack(anchor="w", padx=10)
+
         self.txt_check_var = tk.BooleanVar(value=True)
         self.txt_check = ttk.Checkbutton(
             self.output_check_label_frame,
@@ -98,6 +109,7 @@ class GUI:
             variable=self.txt_check_var
         )
         self.txt_check.pack(anchor="w", padx=10)
+
         self.json_check_var = tk.BooleanVar(value=True)
         self.json_check = ttk.Checkbutton(
             self.output_check_label_frame,
@@ -105,6 +117,7 @@ class GUI:
             variable=self.json_check_var
         )
         self.json_check.pack(anchor="w", padx=10)
+
         self.tsv_check_var = tk.BooleanVar(value=True)
         self.tsv_check = ttk.Checkbutton(
             self.output_check_label_frame,
