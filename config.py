@@ -17,6 +17,7 @@ class Config:
         # to install the appropriate dependencies for each platform
         self.device = "cpu"
         self.compute_type = "int8"
+        self.batch_size = 8
         # this isn't used in the code but is here for reference/documentation purposes
         self.supported_languages_shorthand = [
             "af", "am", "ar", "as", "az", "ba", "be", "bg", "bn", "bo",
