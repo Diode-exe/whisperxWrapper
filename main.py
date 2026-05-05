@@ -7,6 +7,7 @@ import threading
 
 from transcribe import WhisperXWrapper
 from config import Config
+from advanced_settings import AdvancedSettingsWindow
 
 configuration = Config()
 
@@ -21,7 +22,9 @@ class GUI:
         self.whisper_x_ref = whisper_x_ref
         self.root = tk.Tk()
         self.root.title("WhisperX GUI Wrapper")
-        self.root.geometry("500x500")
+        self.root.geometry("500x600")
+
+        self.advanced_settings_window = AdvancedSettingsWindow(self.root, configuration)
 
         # self.style = ttk.Style(self.root)
         # self.style.theme_use('classic')
@@ -30,7 +33,7 @@ class GUI:
         self.main_frame = ttk.Frame(self.root, padding="20")
         self.main_frame.pack(fill="both", expand=True)
 
-        # --- Radio Button Section (Model Selection) ---
+        # --- Mode Options ---
         self.style_label = ttk.Label(self.main_frame,
                                      text="Transcription Mode:", font=("Arial", 10, "bold"))
         self.style_label.pack(anchor="w", pady=(0, 5))
@@ -45,6 +48,14 @@ class GUI:
         )
         self.radio_transcribe.pack(anchor="w", padx=10)
 
+        self.radio_translate = ttk.Radiobutton(
+            self.main_frame,
+            text="Translate (To English)",
+            variable=self.mode_var,
+            value="translate"
+        )
+        self.radio_translate.pack(anchor="w", padx=10)
+
         self.diarize_var = tk.BooleanVar(value=False)
         self.diarize = ttk.Checkbutton(
             self.main_frame,
@@ -53,24 +64,27 @@ class GUI:
         )
         self.diarize.pack(anchor="w", padx=10)
 
-        # self.radio_translate = ttk.Radiobutton(
-        #     self.main_frame,
-        #     text="Translate (To English)",
-        #     variable=self.mode_var,
-        #     value="translate"
-        # )
-        # self.radio_translate.pack(anchor="w", padx=10)
-
+         # --- Language Selection Dropdown ---
         self.language_label = ttk.Label(self.main_frame,
                                         text="Select Language:", font=("Arial", 10, "bold"))
         self.language_label.pack(anchor="e", padx=30)
 
         self.language_var = tk.StringVar(value="English")
+
+        self.auto_detect_option_var = tk.BooleanVar(value=True)
+        self.auto_detect_check = ttk.Checkbutton(
+            self.main_frame,
+            text="Auto-Detect Language",
+            variable=self.auto_detect_option_var,
+            command=lambda: self.language_select.config(state="disabled" if self.auto_detect_option_var.get() else "readonly")
+        )
+        self.auto_detect_check.pack(anchor="e", padx=2)
+
         self.language_select = ttk.Combobox(
             self.main_frame,
             textvariable=self.language_var,
             values=configuration.supported_languages_longhand,
-            state="readonly"  # prevents manual text entry
+            state="disabled" if self.auto_detect_option_var.get() else "readonly"  # prevents manual text entry
         )
         self.language_select.pack(anchor="e")
 
@@ -167,8 +181,9 @@ class GUI:
                                   command=self.start_transcription)
         self.btn_run.pack(fill="x", pady=5)
 
-        # self.btn_settings = ttk.Button(self.main_frame, text="Advanced Settings")
-        # self.btn_settings.pack(fill="x", pady=5)
+        self.btn_settings = ttk.Button(self.main_frame, text="Advanced Settings",
+                                       command=self.advanced_settings_window.show_window)
+        self.btn_settings.pack(fill="x", pady=5)
 
     def start_transcription(self):
         if not self.file_to_process:
@@ -209,12 +224,24 @@ class GUI:
         ] if var.get()]
 
         def trans_task():
-            self.whisper_x_ref.transcribe_and_align(
-                self.file_to_process,
-                language=self.language_var.get(),
-                diarize=self.diarize_var.get(),
-                output_formats=output_formats
-            )
+            if self.auto_detect_option_var.get():
+                print("Auto-detecting language...")
+                self.whisper_x_ref.transcribe_and_align(
+                    self.file_to_process,
+                    language=None,  # Let whisperx auto-detect the language
+                    diarize=self.diarize_var.get(),
+                    output_formats=output_formats,
+                    task=self.mode_var.get()
+                )
+            else:
+                print(f"Using selected language: {self.language_var.get()}")
+                self.whisper_x_ref.transcribe_and_align(
+                    self.file_to_process,
+                    language=self.language_var.get(),
+                    diarize=self.diarize_var.get(),
+                    output_formats=output_formats,
+                    task=self.mode_var.get()
+                )
             # Re-enable the UI on completion
             self.root.after(0, lambda: self.btn_run.config(state="normal", text="Start Processing"))
             self.root.after(0, lambda: messagebox.showinfo("Done", "Transcription Complete!"))

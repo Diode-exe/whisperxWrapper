@@ -32,7 +32,15 @@ class WhisperXWrapper:
             compute_type=self.configuration.compute_type
         )
 
-    def transcribe_and_align(self, audio_path, language="English", diarize=False, output_formats=None):
+    def transcribe_and_align(self, audio_path, language=None, diarize=False, output_formats=None,
+                             task="transcribe"):
+        """Transcribe and align the given audio file, optionally performing diarization
+        and writing output in specified formats.
+        Audio path should be a valid path to an audio file.
+        Language can be specified as a longhand name (e.g., "English") or None for auto-detection.
+        Diarization will be performed if `diarize` is True and a valid Hugging Face token is available.
+        Output formats should be a list of format strings (e.g., ["json", "srt"]) or None for no output writing.
+        """
         if output_formats is None:
             output_formats = []
         try:
@@ -43,14 +51,15 @@ class WhisperXWrapper:
 
         audio = whisperx.load_audio(audio_path)
         print("Loaded audio, starting transcription...")
-        language_short = self.configuration.long_to_short.get(language, "en")
-        print(f"Transcription language code: {language_short}")
+        language_short = self.configuration.long_to_short.get(language, None) if language else None
+        print(f"Transcription language code: {language_short if language_short else 'Auto-detecting'}")
         try:
             result = self.model.transcribe(
                 audio,
                 batch_size=16,
                 language=language_short,
                 language_code=language_short,
+                task=task
             )
         except TypeError:
             # Older/newer whisperx versions may not accept `language_code` kwarg.
@@ -58,6 +67,7 @@ class WhisperXWrapper:
                 audio,
                 batch_size=16,
                 language=language_short,
+                task=task
             )
         # keep original transcription result (contains language metadata)
         trans_result = result
