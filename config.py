@@ -27,6 +27,7 @@ class Config:
         # can be changed in the advanced settings window of the GUI
         self.compute_type = "float16"
         self.batch_size = 8
+        self.device_index = "0"  # default GPU device index, can be changed in advanced settings
         # this isn't used in the code but is here for reference/documentation purposes
         self.supported_languages_shorthand = [
             "af", "am", "ar", "as", "az", "ba", "be", "bg", "bn", "bo",

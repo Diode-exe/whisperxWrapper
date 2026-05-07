@@ -14,6 +14,10 @@ class AdvancedSettingsWindow:
         self.compute_type_label = None
         self.compute_type_combobox = None
 
+        self.device_index_var = None
+        self.device_index_label = None
+        self.device_index_entry = None
+
         self.apply_button = None
 
     def show_window(self):
@@ -37,6 +41,12 @@ class AdvancedSettingsWindow:
         self.compute_type_combobox.set(self.configuration.compute_type)
         self.compute_type_combobox.pack(pady=5)
 
+        self.device_index_label = ttk.Label(self.window, text="Device Index (for GPU):")
+        self.device_index_label.pack(pady=5)
+        self.device_index_var = tk.StringVar(value="0")
+        self.device_index_entry = ttk.Entry(self.window, textvariable=self.device_index_var)
+        self.device_index_entry.pack(pady=5)
+
         self.apply_button = ttk.Button(self.window, text="Apply", command=self.apply_settings)
         self.apply_button.pack(pady=20)
 
@@ -50,6 +60,7 @@ class AdvancedSettingsWindow:
                 return
             self.configuration.batch_size = batch_size
             self.configuration.compute_type = self.compute_type_var.get()
+            self.configuration.device_index = self.device_index_var.get()
             self.window.destroy()
         except ValueError as e:
             messagebox.showerror("Invalid Input", str(e))
