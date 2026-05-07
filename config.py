@@ -23,6 +23,8 @@ class Config:
         # cannot be changed because you would need
         # to install the appropriate dependencies for each platform
         self.device = "cpu"
+        # compute type for model inference
+        # can be changed in the advanced settings window of the GUI
         self.compute_type = "float16"
         self.batch_size = 8
         # this isn't used in the code but is here for reference/documentation purposes
