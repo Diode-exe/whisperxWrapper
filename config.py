@@ -1,4 +1,11 @@
+"""Handles configuration settings for the WhisperXWrapper application, including model selection,
+device settings, and supported languages. This class provides a centralized location for managing
+these settings, making it easier to maintain and update the application as needed."""
+
 class Config:
+    """Configuration class for the WhisperXWrapper application. This class holds settings related to
+    model selection, device configuration, and supported languages. It also includes a method for
+    loading the Hugging Face token from a file."""
     def __init__(self):
         # default model name
         # can be changed in the GUI
@@ -120,7 +127,8 @@ class Config:
                               'Vietnamese': 'vi', 'Yoruba': 'yo',
                               'Chinese': 'zh'}
 
-    def load_HF_token(self):
+    def load_hf_token(self):
+        """Loads the Hugging Face token from a file."""
         try:
             with open("hf_token.txt", "r", encoding="utf-8") as f:
                 token = f.read().strip()

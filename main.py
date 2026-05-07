@@ -217,6 +217,9 @@ class GUI:
             self.run_actual_transcription()
 
     def run_actual_transcription(self):
+        # concise logic
+        # create a list of selected formats by checking the state of each checkbox variable
+        # clever
         output_formats = [fmt for fmt, var in [
             ("srt", self.srt_check_var), ("vtt", self.vtt_check_var),
             ("txt", self.txt_check_var), ("json", self.json_check_var),

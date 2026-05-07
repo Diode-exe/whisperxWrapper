@@ -94,7 +94,7 @@ class WhisperXWrapper:
             result = {**(result or {}), "language": trans_result.get("language", language_short)}
         print("Alignment complete.")
         if diarize:
-            hf_token = self.configuration.load_HF_token()
+            hf_token = self.configuration.load_hf_token()
             if not hf_token:
                 print("Cannot perform diarization without Hugging Face token. "
                       "Please provide a valid token in 'hf_token.txt'. Skipping diarization.")
