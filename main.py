@@ -80,6 +80,15 @@ class GUI:
         )
         self.diarize.pack(anchor="w", padx=10)
 
+        self.alignment_var = tk.BooleanVar(value=True)
+        self.alignment = ttk.Checkbutton(
+            self.main_frame,
+            text="Enable Phoneme Alignment",
+            variable=self.alignment_var,
+            command=self.warn_no_alignment
+        )
+        self.alignment.pack(anchor="w", padx=10)
+
          # --- Language Selection Dropdown ---
         self.language_label = ttk.Label(self.main_frame,
                                         text="Select Language:", font=("Arial", 10, "bold"))
@@ -329,6 +338,22 @@ class GUI:
             self.all_formats_var.set(True)
         else:
             self.all_formats_var.set(False)
+
+    def warn_no_alignment(self):
+        if not configuration.suppress_no_align_warning:
+            # user just checked the box
+            # so don't show the warning
+            # because alignment is now enabled
+            if not self.alignment_var.get():
+                messagebox.showwarning(
+                    "Alignment Disabled",
+                    "Warning. Phoneme alignment is currently disabled.\n"
+                    "This means the output subtitles may drift from the audio.\n"
+                    "If you want to enable alignment, please check the 'Enable Phoneme Alignment' box.\n"
+                    "Note that enabling alignment may increase processing time and resource usage, especially on larger models or longer audio files.\n"
+                    "Suppress this warning by changing self.suppress_no_align_warning to True in config.py\n"
+                    "if you don't want to see it again."
+                )
 
     def run(self):
         """Enter the Tk main event loop and handle KeyboardInterrupt.
