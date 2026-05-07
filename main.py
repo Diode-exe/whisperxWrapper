@@ -12,7 +12,23 @@ from advanced_settings import AdvancedSettingsWindow
 configuration = Config()
 
 class GUI:
+    """Graphical User Interface for the WhisperXWrapper application.
+    This class uses tkinter to create a user-friendly interface for selecting audio/video files,
+    choosing transcription options, and managing the transcription process. It interacts with a
+    `WhisperXWrapper` instance to perform model loading and transcription tasks in background threads,
+    ensuring the UI remains responsive. The GUI also includes an advanced settings window for
+    additional configuration options."""
+
     def __init__(self, whisper_x_ref=None):
+        """Initialize the GUI and its widgets.
+
+        Args:
+            whisper_x_ref: Optional reference to a `WhisperXWrapper` instance
+                used to perform model loading and transcription operations.
+
+        This sets up all tkinter widgets, default state variables, and
+        prepares the advanced settings window.
+        """
         self.file_to_process = None
         self.whisper_thread = None
         self.load_model_thread = None
@@ -186,6 +202,13 @@ class GUI:
         self.btn_settings.pack(fill="x", pady=5)
 
     def start_transcription(self):
+        """Begin model loading (background) and start transcription flow.
+
+        If no file is selected a warning is shown. Otherwise the run button
+        is disabled and the model load is started in a daemon thread. The
+        method then kicks off a polling loop (`monitor_load_thread`) which
+        will continue once model loading completes.
+        """
         if not self.file_to_process:
             messagebox.showwarning("No File Selected", "Please select a file to process.")
             return
@@ -207,7 +230,12 @@ class GUI:
         self.monitor_load_thread()
 
     def monitor_load_thread(self):
-        """Checks if the model loading thread is finished every 100ms."""
+        """Poll the model loading thread until it finishes.
+
+        This method schedules itself on the Tk event loop with `after(100)`
+        while the loading thread is alive. When loading completes it updates
+        the UI and triggers the transcription step.
+        """
         if self.load_model_thread.is_alive():
             # Thread is still working, check again in 100ms
             self.root.after(100, self.monitor_load_thread)
@@ -217,9 +245,13 @@ class GUI:
             self.run_actual_transcription()
 
     def run_actual_transcription(self):
-        # concise logic
-        # create a list of selected formats by checking the state of each checkbox variable
-        # clever
+        """Start the transcription task in a background thread.
+
+        Builds the list of selected output formats from the checkbox variables
+        and then starts a daemon thread which calls `transcribe_and_align` on
+        the `whisper_x_ref`. When transcription finishes the UI is re-enabled
+        and a completion message is shown.
+        """
         output_formats = [fmt for fmt, var in [
             ("srt", self.srt_check_var), ("vtt", self.vtt_check_var),
             ("txt", self.txt_check_var), ("json", self.json_check_var),
@@ -253,12 +285,22 @@ class GUI:
         self.whisper_thread.start()
 
     def select_file(self):
+        """Open a file dialog to choose an audio/video file to process.
+
+        The selected path is stored in `self.file_to_process`. If the user
+        cancels the dialog the value will be an empty string.
+        """
         self.file_to_process = filedialog.askopenfilename(
             title="Select Audio/Video File",
             filetypes=[("Audio/Video Files", "*.mp4 *.mp3 *.wav *.m4a"), ("All Files", "*.*")]
         )
 
     def toggle_all_checkboxes(self):
+        """Set or clear all individual format checkboxes.
+
+        When the "Save in All Formats" checkbox is toggled this helper sets
+        each individual output-format variable to the same boolean value.
+        """
         if self.all_formats_var.get():
             for var in self.check_vars:
                 var.set(True)
@@ -267,12 +309,24 @@ class GUI:
                 var.set(False)
 
     def monitor_all_checkbox_state(self):
+        """Keep the "Save in All Formats" checkbox state in sync.
+
+        Called when any individual format checkbox changes; this updates the
+        master `all_formats_var` so it reflects whether all formats are
+        currently selected or not.
+        """
         if all(var.get() for var in self.check_vars):
             self.all_formats_var.set(True)
         else:
             self.all_formats_var.set(False)
 
     def run(self):
+        """Enter the Tk main event loop and handle KeyboardInterrupt.
+
+        This wraps `mainloop()` in a try/except so a SIGINT (Ctrl+C) will
+        gracefully stop and destroy the Tk root window instead of leaving the
+        process in an inconsistent state.
+        """
         try:
             self.root.mainloop()
         except KeyboardInterrupt:
