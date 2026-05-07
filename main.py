@@ -184,6 +184,16 @@ class GUI:
         )
         self.tsv_check.pack(anchor="w", padx=10)
 
+        self.aud_check_var = tk.BooleanVar(value=True)
+        self.check_vars.append(self.aud_check_var)
+        self.aud_check = ttk.Checkbutton(
+            self.output_check_label_frame,
+            text="Save as .aud",
+            variable=self.aud_check_var,
+            command=self.monitor_all_checkbox_state
+        )
+        self.aud_check.pack(anchor="w", padx=10)
+
         # # --- Separator ---
         # self.sep = ttk.Separator(self.main_frame, orient="horizontal")
         # self.sep.pack(fill="x", pady=20)
@@ -255,7 +265,7 @@ class GUI:
         output_formats = [fmt for fmt, var in [
             ("srt", self.srt_check_var), ("vtt", self.vtt_check_var),
             ("txt", self.txt_check_var), ("json", self.json_check_var),
-            ("tsv", self.tsv_check_var)
+            ("tsv", self.tsv_check_var), ("aud", self.aud_check_var)
         ] if var.get()]
 
         def trans_task():
