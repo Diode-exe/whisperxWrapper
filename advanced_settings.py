@@ -18,6 +18,25 @@ class AdvancedSettingsWindow:
         self.device_index_label = None
         self.device_index_entry = None
 
+        self.speakers_options_frame = None
+        
+        self.min_frame = None
+
+        self.enable_min_speaker_var = None
+        self.enable_min_speaker_check = None
+        self.enable_max_speaker_var = None
+        self.enable_max_speaker_check = None
+
+        self.min_speakers_var = None
+        self.min_speakers_label = None
+        self.min_speakers_entry = None
+        
+        self.max_frame = None
+
+        self.max_speakers_var = None
+        self.max_speakers_label = None
+        self.max_speakers_entry = None
+
         self.apply_button = None
 
     def show_window(self):
@@ -47,8 +66,62 @@ class AdvancedSettingsWindow:
         self.device_index_entry = ttk.Entry(self.window, textvariable=self.device_index_var)
         self.device_index_entry.pack(pady=5)
 
+        self.speakers_options_frame = ttk.LabelFrame(self.window, text="Speaker Diarization Options")
+        self.speakers_options_frame.pack(pady=10, fill="both", expand=True)
+
+        # Create vertical sub-frames so each checkbox appears above its entry
+        self.min_frame = ttk.Frame(self.speakers_options_frame)
+        self.min_frame.pack(side="left", padx=10, pady=5, fill="y", expand=True)
+
+        self.enable_min_speaker_var = tk.BooleanVar(value=False)
+        self.enable_min_speaker_check = ttk.Checkbutton(self.min_frame,
+                                text="Enable Minimum Speakers",
+                                variable=self.enable_min_speaker_var,
+                                command=self.toggle_min_speakers)
+        self.enable_min_speaker_check.pack(anchor="n")
+
+        self.min_speakers_label = ttk.Label(self.min_frame, text="Minimum Speakers (for diarization):")
+        self.min_speakers_label.pack(anchor="n", pady=(6, 0))
+        self.min_speakers_var = tk.StringVar(value="")
+        self.min_speakers_entry = ttk.Entry(self.min_frame, textvariable=self.min_speakers_var)
+        self.min_speakers_entry.pack(anchor="n", pady=(0, 6))
+        # start disabled until enabled by the checkbox
+        self.min_speakers_entry.config(state="disabled")
+
+        self.max_frame = ttk.Frame(self.speakers_options_frame)
+        self.max_frame.pack(side="right", padx=10, pady=5, fill="y", expand=True)
+
+        self.enable_max_speaker_var = tk.BooleanVar(value=False)
+        self.enable_max_speaker_check = ttk.Checkbutton(self.max_frame,
+                                text="Enable Maximum Speakers",
+                                variable=self.enable_max_speaker_var,
+                                command=self.toggle_max_speakers)
+        self.enable_max_speaker_check.pack(anchor="n")
+
+        self.max_speakers_label = ttk.Label(self.max_frame, text="Maximum Speakers (for diarization):")
+        self.max_speakers_label.pack(anchor="n", pady=(6, 0))
+        self.max_speakers_var = tk.StringVar(value="10")
+        self.max_speakers_entry = ttk.Entry(self.max_frame, textvariable=self.max_speakers_var)
+        self.max_speakers_entry.pack(anchor="n", pady=(0, 6))
+        # start disabled until enabled by the checkbox
+        self.max_speakers_entry.config(state="disabled")
+
         self.apply_button = ttk.Button(self.window, text="Apply", command=self.apply_settings)
         self.apply_button.pack(pady=20)
+
+    def toggle_min_speakers(self):
+        if self.enable_min_speaker_var.get():
+            self.min_speakers_entry.config(state="normal")
+        else:
+            self.min_speakers_entry.config(state="disabled")
+            self.min_speakers_var.set("None")
+
+    def toggle_max_speakers(self):
+        if self.enable_max_speaker_var.get():
+            self.max_speakers_entry.config(state="normal")
+        else:
+            self.max_speakers_entry.config(state="disabled")
+            self.max_speakers_var.set("10")
 
     def apply_settings(self):
         """Apply the advanced settings entered by the user."""
@@ -61,6 +134,8 @@ class AdvancedSettingsWindow:
             self.configuration.batch_size = batch_size
             self.configuration.compute_type = self.compute_type_var.get()
             self.configuration.device_index = self.device_index_var.get()
+            self.configuration.min_speakers = self.min_speakers_var.get()
+            self.configuration.max_speakers = self.max_speakers_var.get()
             self.window.destroy()
         except ValueError as e:
             messagebox.showerror("Invalid Input", str(e))
