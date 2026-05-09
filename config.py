@@ -30,6 +30,7 @@ class Config:
         self.device_index = "0"  # default GPU device index, can be changed in advanced settings
         # suppress the warning about not doing alignment
         self.suppress_no_align_warning = False
+        self.temperature = 0.0  # default temperature for transcription, can be changed in advanced settings
         # this isn't used in the code but is here for reference/documentation purposes
         self.supported_languages_shorthand = [
             "af", "am", "ar", "as", "az", "ba", "be", "bg", "bn", "bo",

@@ -37,75 +37,84 @@ class AdvancedSettingsWindow:
         self.max_speakers_label = None
         self.max_speakers_entry = None
 
+        self.temperature_var = None
+        self.temperature_label = None
+        self.temperature_entry = None
+
+        self.beam_size_var = None
+        self.beam_size_label = None
+        self.beam_size_entry = None
+
         self.apply_button = None
 
     def show_window(self):
         self.window = tk.Toplevel(self.parent)
         self.window.title("Advanced Settings")
-        self.window.geometry("500x400")
+        self.window.geometry("500x600")
 
-        self.batch_size_label = ttk.Label(self.window, text="Batch Size:", anchor="w")
-        self.batch_size_label.pack(pady=(0, 5), anchor="w", padx=10)
+        # Batch size
+        self.batch_size_label = ttk.Label(self.window, text="Batch Size:")
+        self.batch_size_label.pack(pady=(10, 0), anchor="w", padx=10)
         self.batch_size_entry = ttk.Entry(self.window)
         self.batch_size_entry.insert(0, str(self.configuration.batch_size))
-        self.batch_size_entry.pack(pady=(0, 5), anchor="w", padx=10)
+        self.batch_size_entry.pack(pady=(0, 10), anchor="w", padx=10)
 
-        self.compute_type_var = tk.StringVar(value=self.configuration.compute_type)
+        # Compute type
         self.compute_type_label = ttk.Label(self.window, text="Compute Type:")
-        self.compute_type_label.pack(pady=(0, 5), anchor="w", padx=10)
+        self.compute_type_label.pack(pady=(0, 0), anchor="w", padx=10)
         self.compute_type_combobox = ttk.Combobox(self.window,
                                                   values=["int8", "float16", "float32"],
                                                   textvariable=self.compute_type_var,
-                                                  state="readonly")
+                                                  state="readonly",
+                                                  width=17)
         self.compute_type_combobox.set(self.configuration.compute_type)
-        self.compute_type_combobox.pack(pady=(0, 5), anchor="w", padx=10)
+        self.compute_type_combobox.pack(pady=(0, 10), anchor="w", padx=10)
 
+        # Device index
         self.device_index_label = ttk.Label(self.window, text="Device Index (for GPU):")
-        self.device_index_label.pack(pady=(0, 5), anchor="w", padx=10)
-        self.device_index_var = tk.StringVar(value="0")
+        self.device_index_label.pack(pady=(0, 0), anchor="w", padx=10)
         self.device_index_entry = ttk.Entry(self.window, textvariable=self.device_index_var)
-        self.device_index_entry.pack(pady=(0, 5), anchor="w", padx=10)
+        self.device_index_entry.pack(pady=(0, 10), anchor="w", padx=10)
 
-        self.speakers_options_frame = ttk.LabelFrame(self.window, text="Speaker Diarization Options")
-        self.speakers_options_frame.pack(pady=10, fill="x", expand=False, anchor="w", padx=10)
+        # Temperature
+        self.temperature_label = ttk.Label(self.window, text="Temperature:")
+        self.temperature_label.pack(pady=(0, 0), anchor="w", padx=10)
+        self.temperature_entry = ttk.Entry(self.window, textvariable=self.temperature_var, width=8)
+        self.temperature_entry.pack(pady=(0, 10), anchor="w", padx=10)
 
-        # Create vertical sub-frames so each checkbox appears above its entry
-        self.min_frame = ttk.Frame(self.speakers_options_frame)
-        self.min_frame.pack(side="left", padx=10, pady=5, fill="y", expand=True)
+        # Beam size
+        self.beam_size_label = ttk.Label(self.window, text="Beam Size:")
+        self.beam_size_label.pack(pady=(0, 0), anchor="w", padx=10)
+        self.beam_size_entry = ttk.Entry(self.window, textvariable=self.beam_size_var, width=6)
+        self.beam_size_entry.pack(pady=(0, 10), anchor="w", padx=10)
 
-        self.enable_min_speaker_var = tk.BooleanVar(value=False)
-        self.enable_min_speaker_check = ttk.Checkbutton(self.min_frame,
-                                text="Enable Minimum Speakers",
-                                variable=self.enable_min_speaker_var,
-                                command=self.toggle_min_speakers)
-        self.enable_min_speaker_check.pack(anchor="n")
+        # Minimum speakers
+        self.enable_min_speaker_check = ttk.Checkbutton(self.window,
+                    text="Enable Minimum Speakers",
+                    variable=self.enable_min_speaker_var,
+                    command=self.toggle_min_speakers)
+        self.enable_min_speaker_check.pack(anchor="w", padx=10)
 
-        self.min_speakers_label = ttk.Label(self.min_frame, text="Minimum Speakers (for diarization):")
-        self.min_speakers_label.pack(anchor="n", pady=(6, 0))
-        self.min_speakers_var = tk.StringVar(value="")
-        self.min_speakers_entry = ttk.Entry(self.min_frame, textvariable=self.min_speakers_var)
-        self.min_speakers_entry.pack(anchor="n", pady=(0, 6))
-        # start disabled until enabled by the checkbox
+        self.min_speakers_label = ttk.Label(self.window, text="Minimum Speakers (for diarization):")
+        self.min_speakers_label.pack(pady=(6, 0), anchor="w", padx=10)
+        self.min_speakers_entry = ttk.Entry(self.window, textvariable=self.min_speakers_var)
+        self.min_speakers_entry.pack(pady=(0, 10), anchor="w", padx=10)
         self.min_speakers_entry.config(state="disabled")
 
-        self.max_frame = ttk.Frame(self.speakers_options_frame)
-        self.max_frame.pack(side="right", padx=10, pady=5, fill="y", expand=True)
+        # Maximum speakers
+        self.enable_max_speaker_check = ttk.Checkbutton(self.window,
+                    text="Enable Maximum Speakers",
+                    variable=self.enable_max_speaker_var,
+                    command=self.toggle_max_speakers)
+        self.enable_max_speaker_check.pack(anchor="w", padx=10)
 
-        self.enable_max_speaker_var = tk.BooleanVar(value=False)
-        self.enable_max_speaker_check = ttk.Checkbutton(self.max_frame,
-                                text="Enable Maximum Speakers",
-                                variable=self.enable_max_speaker_var,
-                                command=self.toggle_max_speakers)
-        self.enable_max_speaker_check.pack(anchor="n")
-
-        self.max_speakers_label = ttk.Label(self.max_frame, text="Maximum Speakers (for diarization):")
-        self.max_speakers_label.pack(anchor="n", pady=(6, 0))
-        self.max_speakers_var = tk.StringVar(value="10")
-        self.max_speakers_entry = ttk.Entry(self.max_frame, textvariable=self.max_speakers_var)
-        self.max_speakers_entry.pack(anchor="n", pady=(0, 6))
-        # start disabled until enabled by the checkbox
+        self.max_speakers_label = ttk.Label(self.window, text="Maximum Speakers (for diarization):")
+        self.max_speakers_label.pack(pady=(6, 0), anchor="w", padx=10)
+        self.max_speakers_entry = ttk.Entry(self.window, textvariable=self.max_speakers_var)
+        self.max_speakers_entry.pack(pady=(0, 10), anchor="w", padx=10)
         self.max_speakers_entry.config(state="disabled")
 
+        # Apply button
         self.apply_button = ttk.Button(self.window, text="Apply", command=self.apply_settings)
         self.apply_button.pack(pady=20)
 
@@ -136,6 +145,7 @@ class AdvancedSettingsWindow:
             self.configuration.device_index = self.device_index_var.get()
             self.configuration.min_speakers = self.min_speakers_var.get()
             self.configuration.max_speakers = self.max_speakers_var.get()
+            self.configuration.temperature = float(self.temperature_var.get())
             self.window.destroy()
         except ValueError as e:
             messagebox.showerror("Invalid Input", str(e))
