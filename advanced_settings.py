@@ -7,6 +7,8 @@ class AdvancedSettingsWindow:
         self.configuration = configuration
         self.window = None
 
+        self.top_row_frame = None
+
         self.batch_size_label = None
         self.batch_size_entry = None
 
@@ -18,10 +20,6 @@ class AdvancedSettingsWindow:
         self.device_index_label = None
         self.device_index_entry = None
 
-        self.speakers_options_frame = None
-
-        self.min_frame = None
-
         self.enable_min_speaker_var = None
         self.enable_min_speaker_check = None
         self.enable_max_speaker_var = None
@@ -30,8 +28,6 @@ class AdvancedSettingsWindow:
         self.min_speakers_var = None
         self.min_speakers_label = None
         self.min_speakers_entry = None
-
-        self.max_frame = None
 
         self.max_speakers_var = None
         self.max_speakers_label = None
@@ -53,22 +49,25 @@ class AdvancedSettingsWindow:
         self.window.geometry("500x600")
 
         # Batch size
-        self.batch_size_label = ttk.Label(self.window, text="Batch Size:")
-        self.batch_size_label.pack(pady=(10, 0), anchor="w", padx=10)
-        self.batch_size_entry = ttk.Entry(self.window)
+        self.top_row_frame = ttk.Frame(self.window)
+        self.top_row_frame.pack(fill="x", pady=(10, 0))
+
+        self.batch_size_label = ttk.Label(self.top_row_frame, text="Batch Size:")
+        self.batch_size_label.pack(pady=(10, 0), anchor="w", padx=10, side="left")
+        self.batch_size_entry = ttk.Entry(self.top_row_frame)
         self.batch_size_entry.insert(0, str(self.configuration.batch_size))
-        self.batch_size_entry.pack(pady=(0, 10), anchor="w", padx=10)
+        self.batch_size_entry.pack(pady=(0, 10), anchor="w", padx=10, side="left")
 
         # Compute type
-        self.compute_type_label = ttk.Label(self.window, text="Compute Type:")
-        self.compute_type_label.pack(pady=(0, 0), anchor="w", padx=10)
-        self.compute_type_combobox = ttk.Combobox(self.window,
+        self.compute_type_label = ttk.Label(self.top_row_frame, text="Compute Type:")
+        self.compute_type_label.pack(pady=(0, 0), anchor="w", padx=10, side="right")
+        self.compute_type_combobox = ttk.Combobox(self.top_row_frame,
                                                   values=["int8", "float16", "float32"],
                                                   textvariable=self.compute_type_var,
                                                   state="readonly",
                                                   width=17)
         self.compute_type_combobox.set(self.configuration.compute_type)
-        self.compute_type_combobox.pack(pady=(0, 10), anchor="w", padx=10)
+        self.compute_type_combobox.pack(pady=(0, 10), anchor="w", padx=10, side="right")
 
         # Device index
         self.device_index_label = ttk.Label(self.window, text="Device Index (for GPU):")
