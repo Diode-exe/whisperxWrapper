@@ -57,23 +57,30 @@ class AdvancedSettingsWindow:
         # Two logical columns (label/input) on left and right, so 4 grid columns total
         content.columnconfigure(1, weight=1)
         content.columnconfigure(3, weight=1)
+        
+        # LabelFrames for grouping related settings
+        performance_frame = ttk.LabelFrame(content, text="Performance Settings", padding=10)
+        performance_frame.grid(row=0, column=0, columnspan=4, sticky="ew", padx=5, pady=5)
+        
+        speaker_frame = ttk.LabelFrame(content, text="Speaker Settings", padding=10)
+        speaker_frame.grid(row=3, column=0, columnspan=4, sticky="ew", padx=5, pady=5)
 
         # Row 0: Batch Size (left) | Compute Type (right)
         self.batch_size_label = ttk.Label(content, text="Batch Size:")
-        self.batch_size_label.grid(row=0, column=0, sticky="w", padx=5, pady=5)
+        self.batch_size_label.grid(row=1, column=0, sticky="w", padx=5, pady=5)
         self.batch_size_entry = ttk.Entry(content, width=6)
         self.batch_size_entry.insert(0, str(self.configuration.batch_size))
-        self.batch_size_entry.grid(row=0, column=1, sticky="w", padx=5, pady=5)
+        self.batch_size_entry.grid(row=1, column=1, sticky="w", padx=5, pady=5)
 
         self.compute_type_label = ttk.Label(content, text="Compute Type:")
-        self.compute_type_label.grid(row=0, column=2, sticky="w", padx=5, pady=5)
+        self.compute_type_label.grid(row=2, column=2, sticky="w", padx=5, pady=5)
         self.compute_type_combobox = ttk.Combobox(content,
                               values=["int8", "float16", "float32"],
                               textvariable=self.compute_type_var,
                               state="readonly",
                               width=17)
         self.compute_type_combobox.set(self.configuration.compute_type)
-        self.compute_type_combobox.grid(row=0, column=3, sticky="w", padx=5, pady=5)
+        self.compute_type_combobox.grid(row=2, column=3, sticky="w", padx=5, pady=5)
 
         # Row 1: Device Index (left) | Temperature (right)
         self.device_index_label = ttk.Label(content, text="Device Index (for GPU):")
@@ -93,28 +100,28 @@ class AdvancedSettingsWindow:
         self.beam_size_entry.grid(row=2, column=1, sticky="w", padx=5, pady=5)
 
         # Row 3: Minimum speakers
-        self.enable_min_speaker_check = ttk.Checkbutton(content,
+        self.enable_min_speaker_check = ttk.Checkbutton(speaker_frame,
                 text="Enable Minimum Speakers",
                 variable=self.enable_min_speaker_var,
                 command=self.toggle_min_speakers)
         self.enable_min_speaker_check.grid(row=4, column=0, sticky="w", padx=5, pady=5)
 
-        self.min_speakers_label = ttk.Label(content, text="Minimum Speakers (for diarization):")
+        self.min_speakers_label = ttk.Label(speaker_frame, text="Minimum Speakers (for diarization):")
         self.min_speakers_label.grid(row=5, column=0, sticky="w", padx=5, pady=5)
-        self.min_speakers_entry = ttk.Entry(content, textvariable=self.min_speakers_var)
+        self.min_speakers_entry = ttk.Entry(speaker_frame, textvariable=self.min_speakers_var)
         self.min_speakers_entry.grid(row=6, column=0, sticky="w", padx=5, pady=5)
         self.min_speakers_entry.config(state="disabled")
 
         # Row 4: Maximum speakers
-        self.enable_max_speaker_check = ttk.Checkbutton(content,
+        self.enable_max_speaker_check = ttk.Checkbutton(speaker_frame,
                 text="Enable Maximum Speakers",
                 variable=self.enable_max_speaker_var,
                 command=self.toggle_max_speakers)
         self.enable_max_speaker_check.grid(row=7, column=0, sticky="w", padx=5, pady=5)
 
-        self.max_speakers_label = ttk.Label(content, text="Maximum Speakers (for diarization):")
+        self.max_speakers_label = ttk.Label(speaker_frame, text="Maximum Speakers (for diarization):")
         self.max_speakers_label.grid(row=8, column=0, sticky="w", padx=5, pady=5)
-        self.max_speakers_entry = ttk.Entry(content, textvariable=self.max_speakers_var)
+        self.max_speakers_entry = ttk.Entry(speaker_frame, textvariable=self.max_speakers_var)
         self.max_speakers_entry.grid(row=9, column=0, sticky="w", padx=5, pady=5)
         self.max_speakers_entry.config(state="disabled")
 
