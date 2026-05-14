@@ -43,6 +43,7 @@ class AdvancedSettingsWindow:
         self.max_speakers_var = tk.StringVar(value=str(getattr(self.configuration, 'max_speakers', '10')))
         self.temperature_var = tk.StringVar(value=str(getattr(self.configuration, 'temperature', '0.0')))
         self.beam_size_var = tk.StringVar(value=str(getattr(self.configuration, 'beam_size', '1')))
+        self.batch_size_var = tk.StringVar(value=str(getattr(self.configuration, 'batch_size', '8')))
 
     def show_window(self):
         self.window = tk.Toplevel(self.parent)
@@ -66,11 +67,6 @@ class AdvancedSettingsWindow:
         speaker_frame.grid(row=3, column=0, columnspan=4, sticky="ew", padx=5, pady=5)
 
         # Row 0: Batch Size (left) | Compute Type (right)
-        self.batch_size_label = ttk.Label(performance_frame, text="Batch Size:")
-        self.batch_size_label.grid(row=1, column=0, sticky="w", padx=5, pady=5)
-        self.batch_size_entry = ttk.Entry(performance_frame, width=6)
-        self.batch_size_entry.insert(0, str(self.configuration.batch_size))
-        self.batch_size_entry.grid(row=1, column=1, sticky="w", padx=5, pady=5)
 
         self.compute_type_label = ttk.Label(performance_frame, text="Compute Type:")
         self.compute_type_label.grid(row=2, column=2, sticky="w", padx=5, pady=5)
@@ -93,11 +89,16 @@ class AdvancedSettingsWindow:
         self.temperature_entry = ttk.Entry(performance_frame, textvariable=self.temperature_var, width=6)
         self.temperature_entry.grid(row=1, column=3, sticky="w", padx=5, pady=5)
 
+        self.batch_size_label = ttk.Label(performance_frame, text="Batch Size:")
+        self.batch_size_label.grid(row=2, column=0, sticky="w", padx=5, pady=5)
+        self.batch_size_entry = ttk.Entry(performance_frame, textvariable=self.batch_size_var, width=6)
+        self.batch_size_entry.grid(row=2, column=1, sticky="w", padx=5, pady=5)
+
         # Row 2: Beam size (left)
         self.beam_size_label = ttk.Label(performance_frame, text="Beam Size:")
-        self.beam_size_label.grid(row=2, column=0, sticky="w", padx=5, pady=5)
+        self.beam_size_label.grid(row=3, column=0, sticky="w", padx=5, pady=5)
         self.beam_size_entry = ttk.Entry(performance_frame, textvariable=self.beam_size_var, width=6)
-        self.beam_size_entry.grid(row=2, column=1, sticky="w", padx=5, pady=5)
+        self.beam_size_entry.grid(row=3, column=1, sticky="w", padx=5, pady=5)
 
         # Row 3: Minimum speakers
         self.enable_min_speaker_check = ttk.Checkbutton(speaker_frame,
@@ -151,8 +152,14 @@ class AdvancedSettingsWindow:
                 messagebox.showerror("Invalid Input", "Batch size must be greater than 1.")
                 self.window.focus()
                 return
+            beam_size = int(self.beam_size_entry.get())
+            if beam_size < 1:
+                messagebox.showerror("Invalid Input", "Beam size must be at least 1.")
+                self.window.focus()
+                return
             # update the configuration object passed into this window
             self.configuration.batch_size = batch_size
+            self.configuration.beam_size = beam_size
             self.configuration.compute_type = self.compute_type_var.get()
             self.configuration.device_index = self.device_index_var.get()
             self.configuration.min_speakers = self.min_speakers_var.get()

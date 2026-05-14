@@ -34,7 +34,8 @@ class WhisperXWrapper:
         )
 
     def transcribe_and_align(self, audio_path, language=None, diarize=False, output_formats=None,
-                             task="transcribe", temperature=0.0):
+                             task="transcribe", temperature=0.0, batch_size=None, beam_size=None,
+                             align=True):
         """Transcribe and align the given audio file, optionally performing diarization
         and writing output in specified formats.
         """
@@ -50,24 +51,38 @@ class WhisperXWrapper:
         print("Loaded audio, starting transcription...")
         language_short = self.configuration.long_to_short.get(language, None) if language else None
         print(f"Transcription language code: {language_short if language_short else 'Auto-detecting'}")
+        effective_batch_size = batch_size if batch_size is not None else self.configuration.batch_size
+        effective_beam_size = beam_size if beam_size is not None else self.configuration.beam_size
         try:
             result = self.model.transcribe(
                 audio,
-                batch_size=self.configuration.batch_size,
+                batch_size=effective_batch_size,
                 language=language_short,
                 language_code=language_short,
                 task=task,
                 temperature=temperature,
+                beam_size=effective_beam_size,
+                align=align,
             )
         except TypeError:
-            # Older/newer whisperx versions may not accept `language_code` kwarg.
-            result = self.model.transcribe(
-                audio,
-                batch_size=self.configuration.batch_size,
-                language=language_short,
-                task=task,
-                temperature=temperature,
-            )
+            # Older/newer whisperx versions may not accept some kwargs.
+            try:
+                result = self.model.transcribe(
+                    audio,
+                    batch_size=effective_batch_size,
+                    language=language_short,
+                    task=task,
+                    temperature=temperature,
+                    beam_size=effective_beam_size,
+                )
+            except TypeError:
+                result = self.model.transcribe(
+                    audio,
+                    batch_size=effective_batch_size,
+                    language=language_short,
+                    task=task,
+                    temperature=temperature,
+                )
 
         # keep original transcription result (contains language metadata)
         trans_result = result

@@ -286,11 +286,14 @@ class GUI:
                     diarize=self.diarize_var.get(),
                     output_formats=output_formats,
                     task=self.mode_var.get(),
+                    batch_size=configuration.batch_size,
+                    beam_size=configuration.beam_size,
                     # this sucks
                     # we have to pass the global config value because
                     # the advanced settings window updates that directly
                     # race conditions be damned
-                    temperature=configuration.temperature
+                    temperature=configuration.temperature,
+                    align=self.alignment_var.get(),
                 )
             else:
                 print(f"Using selected language: {self.language_var.get()}")
@@ -300,7 +303,10 @@ class GUI:
                     diarize=self.diarize_var.get(),
                     output_formats=output_formats,
                     task=self.mode_var.get(),
-                    temperature=configuration.temperature
+                    batch_size=configuration.batch_size,
+                    beam_size=configuration.beam_size,
+                    temperature=configuration.temperature,
+                    align=self.alignment_var.get()
                 )
             # Re-enable the UI on completion
             self.root.after(0, lambda: self.btn_run.config(state="normal", text="Start Processing"))
