@@ -286,6 +286,10 @@ class GUI:
                     diarize=self.diarize_var.get(),
                     output_formats=output_formats,
                     task=self.mode_var.get(),
+                    # this sucks
+                    # we have to pass the global config value because
+                    # the advanced settings window updates that directly
+                    # race conditions be damned
                     temperature=configuration.temperature
                 )
             else:

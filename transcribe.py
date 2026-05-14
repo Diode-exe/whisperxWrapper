@@ -9,12 +9,13 @@ os.environ["TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD"] = "1"
 
 
 class WhisperXWrapper:
-    def __init__(self):
+    def __init__(self, gui_ref=None):
         self.model = None
         self.model_name = None
         self.configuration = Config()
+        self.gui = gui_ref
 
-    def load_model(self, model_name: str=None):
+    def load_model(self, model_name: str = None):
         if model_name is not None:
             self.model_name = model_name
         else:
@@ -24,22 +25,18 @@ class WhisperXWrapper:
             import whisperx
         except Exception as e:
             print("Failed to import whisperx. Ensure whisperx and its dependencies are installed: "
-                f"{e}")
+                  f"{e}")
 
         self.model = whisperx.load_model(
             self.model_name,
             device=self.configuration.device,
-            compute_type=self.configuration.compute_type
+            compute_type=self.configuration.compute_type,
         )
 
     def transcribe_and_align(self, audio_path, language=None, diarize=False, output_formats=None,
-                             task="transcribe"):
+                             task="transcribe", temperature=0.0):
         """Transcribe and align the given audio file, optionally performing diarization
         and writing output in specified formats.
-        Audio path should be a valid path to an audio file.
-        Language can be specified as a longhand name (e.g., "English") or None for auto-detection.
-        Diarization will be performed if `diarize` is True and a valid Hugging Face token is available.
-        Output formats should be a list of format strings (e.g., ["json", "srt"]) or None for no output writing.
         """
         if output_formats is None:
             output_formats = []
@@ -47,7 +44,7 @@ class WhisperXWrapper:
             import whisperx
         except Exception as e:
             print("Failed to import whisperx for transcription. Ensure whisperx is installed: "
-                f"{e}")
+                  f"{e}")
 
         audio = whisperx.load_audio(audio_path)
         print("Loaded audio, starting transcription...")
@@ -56,27 +53,30 @@ class WhisperXWrapper:
         try:
             result = self.model.transcribe(
                 audio,
-                batch_size=16,
+                batch_size=self.configuration.batch_size,
                 language=language_short,
                 language_code=language_short,
-                task=task
+                task=task,
+                temperature=temperature,
             )
         except TypeError:
             # Older/newer whisperx versions may not accept `language_code` kwarg.
             result = self.model.transcribe(
                 audio,
-                batch_size=16,
+                batch_size=self.configuration.batch_size,
                 language=language_short,
-                task=task
+                task=task,
+                temperature=temperature,
             )
+
         # keep original transcription result (contains language metadata)
         trans_result = result
         print("Transcription complete, starting alignment...")
 
         print(f"Aligning on {self.configuration.device}...")
         model_a, metadata = whisperx.load_align_model(
-            language_code=result["language"],
-            device=self.configuration.device
+            language_code=result.get("language"),
+            device=self.configuration.device,
         )
 
         result = whisperx.align(
@@ -85,7 +85,7 @@ class WhisperXWrapper:
             metadata,
             audio,
             self.configuration.device,
-            return_char_alignments=False
+            return_char_alignments=False,
         )
         # ensure language metadata is present for writers
         try:
@@ -101,7 +101,7 @@ class WhisperXWrapper:
                 return result
             try:
                 diarize_model = whisperx.diarize.DiarizationPipeline(token=hf_token,
-                                                            device=self.configuration.device)
+                                                                     device=self.configuration.device)
                 with warnings.catch_warnings():
                     warnings.filterwarnings(
                         "ignore",

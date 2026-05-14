@@ -151,12 +151,19 @@ class AdvancedSettingsWindow:
                 messagebox.showerror("Invalid Input", "Batch size must be greater than 1.")
                 self.window.focus()
                 return
+            # update the configuration object passed into this window
             self.configuration.batch_size = batch_size
             self.configuration.compute_type = self.compute_type_var.get()
             self.configuration.device_index = self.device_index_var.get()
             self.configuration.min_speakers = self.min_speakers_var.get()
             self.configuration.max_speakers = self.max_speakers_var.get()
             self.configuration.temperature = float(self.temperature_var.get())
+            # persist runtime settings to JSON
+            try:
+                self.configuration.save_settings()
+            except Exception:
+                # don't block UI on save failure
+                pass
             self.window.destroy()
         except ValueError as e:
             messagebox.showerror("Invalid Input", str(e))
