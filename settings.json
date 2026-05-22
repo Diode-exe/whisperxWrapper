@@ -1,0 +1,12 @@
+{
+  "model_name": "large-v3-turbo",
+  "device": "cpu",
+  "compute_type": "float16",
+  "batch_size": 8,
+  "device_index": "0",
+  "temperature": 0.0,
+  "suppress_no_align_warning": false,
+  "min_speakers": "None",
+  "max_speakers": "10",
+  "beam_size": 1
+}
